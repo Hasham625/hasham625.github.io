@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Population Analytics Dashboard | Data Visualization Project</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e1a;
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 30%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(74, 222, 128, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(251, 191, 36, 0.08) 0%, transparent 50%);
+            animation: bgShift 20s ease infinite;
+        }
+
+        @keyframes bgShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Particle effect */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(56, 189, 248, 0.4);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 30px;
+            position: relative;
+        }
+
+        /* Header with glassmorphism */
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            padding: 80px 40px;
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+            animation: headerGlow 8s ease-in-out infinite;
+        }
+
+        @keyframes headerGlow {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10%, 10%); }
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #38bdf8, #4ade80, #fbbf24);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: gradientShift 5s ease infinite;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -1px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: #cbd5e1;
+            margin-bottom: 40px;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.5px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+            justify-items: center;
+        }
+
+        .team-card {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 40px 30px;
+            border-radius: 25px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.1), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .team-card:hover::before {
+            opacity: 1;
+            animation: rotateGlow 3s linear infinite;
+        }
+
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .team-card:hover {
+            transform: translateY(-15px);
+            border-color: #38bdf8;
+            box-shadow: 0 25px 50px rgba(56, 189, 248, 0.4);
+        }
+
+        .member-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            border: 4px solid transparent;
+            background-image: 
+                linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
+                linear-gradient(135deg, #38bdf8, #4ade80, #fbbf24);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            padding: 4px;
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .team-card:hover .member-photo {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 40px rgba(56, 189, 248, 0.5);
+        }
+
+        .member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .member-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .member-role {
+            font-size: 1rem;
+            color: #4ade80;
+            margin-bottom: 15px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .member-id {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 50px;
+            margin-bottom: 40px;
+            border-radius: 25px;
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.1), transparent);
+            transition: left 0.7s;
+        }
+
+        .section:hover::before {
+            left: 100%;
+        }
+
+        .section:hover {
+            transform: translateY(-10px);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.4),
+                0 0 50px rgba(56, 189, 248, 0.2);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        h2 {
+            color: #38bdf8;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.5), transparent);
+            margin-left: 20px;
+        }
+
+        .icon {
+            font-size: 2.2rem;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+        }
+
+        p {
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            padding: 18px 0;
+            padding-left: 50px;
+            position: relative;
+            color: #cbd5e1;
+            font-size: 1.05rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(15, 23, 42, 0.3);
+            margin-bottom: 12px;
+            border-radius: 12px;
+            padding-right: 20px;
+            border-left: 3px solid transparent;
+        }
+
+        li:hover {
+            color: #38bdf8;
+            padding-left: 60px;
+            background: rgba(56, 189, 248, 0.1);
+            border-left-color: #4ade80;
+            box-shadow: 0 5px 20px rgba(56, 189, 248, 0.2);
+        }
+
+        li:before {
+            content: "◆";
+            position: absolute;
+            left: 20px;
+            color: #4ade80;
+            font-size: 1.2rem;
+            transition: all 0.4s ease;
+            filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.6));
+        }
+
+        li:hover:before {
+            color: #38bdf8;
+            transform: translateX(8px) rotate(45deg) scale(1.2);
+            filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.8));
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .tech-item {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(74, 222, 128, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .tech-item:hover::before {
+            opacity: 1;
+        }
+
+        .tech-item:hover {
+            border-color: #38bdf8;
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(56, 189, 248, 0.3);
+        }
+
+        .tech-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #38bdf8;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .tech-desc {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            position: relative;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(56, 189, 248, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            box-shadow: 0 10px 30px rgba(74, 222, 128, 0.4);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 20px 50px rgba(74, 222, 128, 0.6);
+        }
+
+        .video-wrapper {
+            margin-top: 30px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(56, 189, 248, 0.3);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .video-wrapper video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .highlight {
+            color: #4ade80;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            margin-top: 100px;
+            border-top: 1px solid rgba(56, 189, 248, 0.2);
+            color: #64748b;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.4s ease;
+        }
+
+        .stat-card:hover {
+            border-color: #4ade80;
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(74, 222, 128, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #38bdf8;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+
+            .section {
+                padding: 30px;
+            }
+
+            header {
+                padding: 50px 30px;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .container {
+                padding: 40px 20px;
+            }
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection color */
+        ::selection {
+            background: rgba(56, 189, 248, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 7s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 8s;"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Population Analytics Dashboard</h1>
+            <p class="subtitle">Interactive Data Visualization & Analysis Platform</p>
+        </header>
+
+        <div class="section">
+            <h2><span class="icon">👥</span> Meet Our Team</h2>
+            <p style="text-align: center; margin-bottom: 40px;">
+                A dedicated team of data enthusiasts passionate about transforming complex demographic data into meaningful insights
+            </p>
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="member-photo">
+                        <img src="Husnain Mushtaq.PNG" alt="Husnain Mushtaq">
+                    </div>
+                    <div class="member-name">Husnain Mushtaq</div>
+                    <div class="member-id">Reg: 2022219</div>
+                </div>
+                <div class="team-card">
+                    <div class="member-photo">
+                        <img src="Hasham Nadeem.jpeg" alt="Hasham Nadeem">
+                    </div>
+                    <div class="member-name">Hasham Nadeem</div>
+                    <div class="member-id">Reg: 2022205</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🎯</span> Project Overview</h2>
+            <p>
+                The <span class="highlight">Population Analytics Dashboard</span> is an advanced web-based data visualization platform designed to analyze and visualize global population trends across countries and time periods. This interactive dashboard transforms complex demographic data into intuitive visual representations, enabling users to explore population dynamics, growth patterns, and comparative analyses with ease.
+            </p>
+            <p>
+                The platform features an interactive geospatial map, temporal trend analysis, multi-country comparisons, and dynamic filtering capabilities. Users can explore population data ranging from the mid-20th century to present day, identifying patterns and insights that inform understanding of global demographic shifts.
+            </p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">195+</div>
+                    <div class="stat-label">Countries Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">70+</div>
+                    <div class="stat-label">Years of Data</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5+</div>
+                    <div class="stat-label">Visualization Types</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">📊</span> Dataset Description</h2>
+            <p>
+                <strong>Dataset:</strong> World Bank Population Data (countries_population.csv)
+            </p>
+            <p>
+                Our analysis utilizes comprehensive historical population data spanning multiple decades for 195+ countries and territories worldwide. The dataset includes:
+            </p>
+            <ul>
+                <li><strong>Temporal Coverage:</strong> Multi-decade time series data tracking population changes over time</li>
+                <li><strong>Geographic Scope:</strong> Global coverage including countries from all continents and regions</li>
+                <li><strong>Key Metrics:</strong> Total population counts, annual growth rates (%), and year-over-year changes</li>
+                <li><strong>Data Points:</strong> Thousands of observations enabling robust trend analysis and forecasting</li>
+                <li><strong>Quality:</strong> Cleaned and standardized data with proper handling of missing values and outliers</li>
+            </ul>
+            <p>
+                The dataset excludes aggregate regional groupings and income classifications to focus on individual country-level analysis, ensuring precise and actionable insights.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🛠️</span> Tools & Technologies</h2>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-name">⚛️ React.js</div>
+                    <div class="tech-desc">Component-based UI framework</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-name">📈 Chart.js</div>
+                    <div class="tech-desc">Interactive charting library</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-name">📄 PapaParse</div>
+                    <div class="tech-desc">CSV parsing & processing</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-name">🎨 SVG Graphics</div>
+                    <div class="tech-desc">Geospatial visualization</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-name">💻 JavaScript ES6+</div>
+                    <div class="tech-desc">Modern programming features</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-name">🎯 CSS3</div>
+                    <div class="tech-desc">Responsive design & styling</div>
+                </div>
+            </div>
+            <p style="margin-top: 40px;">
+                <strong>Key Features Implemented:</strong>
+            </p>
+            <ul>
+                <li>Interactive geospatial mapping with population-based visualizations</li>
+                <li>Dynamic filtering by population range and time period</li>
+                <li>Multi-country comparison charts with customizable selections</li>
+                <li>Real-time data updates and responsive user interface</li>
+                <li>Statistical summaries including growth rates and historical trends</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🎥</span> Dashboard Walkthrough</h2>
+            <p>
+                Watch our comprehensive video demonstration showcasing all features and functionality of the Population Analytics Dashboard:
+            </p>
+            
+            <div class="video-wrapper">
+                <video controls>
+                    <source src="https://github.com/Hasham625/Hasham625.github.io/releases/download/DV/Screen.Recording.2025-12-24.at.00.26.31.mov" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🔗</span> Project Resources</h2>
+            <div class="btn-container">
+                <a href="https://github.com/Hasham625/myapp" class="btn" target="_blank">
+                    📂 View GitHub Repository
+                </a>
+                <a href="https://husnains-work.netlify.app" class="btn btn-secondary" target="_blank">
+                    🚀 Launch Dashboard
+                </a>
+            </div>
+            
+        </div>
+
+        <footer>
+            <p style="font-size: 1.1rem; margin-bottom: 10px;"><strong>Population Analytics Dashboard</strong></p>
+            <p>Data Visualization Project 2024</p>
+            <p style="margin-top: 20px;">Built with React.js modern web technologies</p>
+        </footer>
+    </div>
+</body>
+</html>
